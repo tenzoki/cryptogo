@@ -1,32 +1,39 @@
 package crypto
 
+
 import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
-func getKey() ([]byte, error) {
-	keyHex := os.Getenv("MKEY")
+func GetDecodedKeyFromEnv(envar string) []byte {
+	keyHex := os.Getenv(envar)
 	if keyHex == "" {
-		keyHex = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+		fmt.Printf("Env var not set: %s\n", envar)
+		return nil
+	}
+	return DecodeKey(keyHex)
+}
+func DecodeKey(keyHex string) []byte {
+	if len(keyHex) > 0 && len(keyHex) < 64 {
+		keyHex = keyHex + strings.Repeat("0", 64-len(keyHex))
 	}
 	key, err := hex.DecodeString(keyHex)
 	if err != nil || len(key) != 32 {
-		return nil, errors.New("MKEY must be 64 hex chars (32 bytes)")
+		fmt.Printf("Key must be 64 hex chars (32 bytes)\n")
+		return nil
 	}
-	return key, nil
+	return key
 }
 
-func Encrypt(data []byte) ([]byte, error) {
-	key, err := getKey()
-	if err != nil {
-		return nil, err
-	}
+func Encrypt(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -43,11 +50,7 @@ func Encrypt(data []byte) ([]byte, error) {
 	return append(nonce, ciphertext...), nil
 }
 
-func Decrypt(enc []byte) ([]byte, error) {
-	key, err := getKey()
-	if err != nil {
-		return nil, err
-	}
+func Decrypt(enc []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
