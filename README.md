@@ -16,3 +16,9 @@ _ helper method `DecodeHey(keyHex string) []byte` decodes the 32 byte string to 
 `func Encrypt(data []byte, key []byte) ([]byte, error)`
 
 `func Decrypt(enc []byte, key []byte) ([]byte, error)`
+
+
+
+## License
+
+This project is licensed under the [European Union Public Licence v1.2 (EUPL)](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12).
